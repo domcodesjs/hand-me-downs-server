@@ -1,7 +1,12 @@
 const app = require('../app');
 const { expect } = require('chai');
 const request = require('supertest');
-const db = require('../knex/knex');
+const {
+  createTables,
+  dropTables,
+  createUser,
+  createListing
+} = require('./testHelpers');
 
 describe('/listings', () => {
   describe('Get listings', () => {
@@ -56,14 +61,46 @@ describe('/listings', () => {
 });
 
 describe('/users', () => {
-  it('Should create a user', () => {
+  it('Should create a user', async () => {
+    await dropTables();
+    await createTables();
     return request(app)
       .post('/users')
-      .send({ email: 'kana@example.com', username: 'kana', password: '123456' })
+      .send({
+        email: 'dom@example.com',
+        username: 'dom',
+        password: '123456'
+      })
       .set('Accept', 'application/json')
       .expect(200)
       .then((res) => {
-        console.log(res.body);
+        expect(res.body).to.have.keys('success', 'user', 'token');
       });
+  });
+});
+
+describe('/auth', () => {
+  it('/auth/login should log a user in', async () => {
+    await dropTables();
+    await createTables();
+    const { email, password } = await createUser();
+    const { body } = await request(app)
+      .post('/auth/login')
+      .send({ email, password })
+      .set('Accept', 'application/json')
+      .expect(200);
+    return expect(body).to.have.keys('success', 'user', 'token');
+  });
+
+  it('/auth/verifyJWT verify a users token and send the user credentials back', async () => {
+    await dropTables();
+    await createTables();
+    const { token } = await createUser();
+    await createListing(token);
+    const { body } = await request(app)
+      .get('/auth/verifyJWT')
+      .set({ Authorization: `Bearer ${token}`, Accept: 'application/json' })
+      .expect(200);
+    return expect(body).to.have.keys('email', 'username', 'role');
   });
 });

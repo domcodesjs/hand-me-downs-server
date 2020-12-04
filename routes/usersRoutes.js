@@ -2,9 +2,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../knex/knex');
 const { body } = require('express-validator');
-const { getUser, createUser } = require('../controllers/usersController');
+const { createUser } = require('../controllers/usersController');
 
-router.get('/:id', getUser);
 router.post(
   '/',
   [
