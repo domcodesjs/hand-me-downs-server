@@ -36,6 +36,7 @@ exports.createUser = async (req, res) => {
       JWT_SECRET
     );
 
+    // extended feature emails! works but gonna implement after I implement user verification email
     // const welcomeEmail = await transporter.sendMail({
     //   from: `"Hand Me Downs" <${SMTP_SENDER}>`,
     //   to: 'dfaulring@gmail.com', // change this out

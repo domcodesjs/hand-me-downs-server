@@ -121,8 +121,6 @@ exports.listingExists = async (req, res) => {
       });
     }
 
-    console.log(listing);
-
     res.json({
       success: true,
       listing: {
@@ -184,7 +182,6 @@ exports.getUserUpdatedListing = async (req, res) => {
   try {
     const { listingId } = req.params;
     const { id } = req.user;
-    console.log(req.user);
     const listing = (
       await db('listings')
         .where({ listing_uid: listingId, listing_user: id })
@@ -231,7 +228,8 @@ exports.getUserListings = async (req, res) => {
       image: 'listing_image',
       slug: 'listing_slug',
       uid: 'listing_uid',
-      sold: 'listing_sold'
+      sold: 'listing_sold',
+      username: 'listing_user'
     });
 
     if (!listings) {
@@ -316,7 +314,7 @@ exports.updateListing = async (req, res) => {
 
     res.json({
       success: true,
-      asdf: 'asdf'
+      listing
     });
   } catch (err) {
     console.log(err);

@@ -6,6 +6,8 @@ const helmet = require('helmet');
 const path = require('path');
 const passport = require('passport');
 
+console.log(process.env.NODE_ENV);
+
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));

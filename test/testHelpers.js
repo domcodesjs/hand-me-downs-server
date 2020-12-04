@@ -13,9 +13,9 @@ exports.createListing = async (token) => {
       .field('category', 'T-Shirts')
       .field('gender', 'Unisex')
       .field('price', 20)
-      .attach('image', `${__dirname}placeholder.png`)
+      .attach('image', './test/placeholder.png')
       .set({ Authorization: `Bearer ${token}`, Accept: 'application/json' });
-    console.log(res.body);
+    return res.body;
   } catch (err) {
     console.log(err);
   }
@@ -33,6 +33,7 @@ exports.createUser = async () => {
       .set('Accept', 'application/json');
     return {
       email: res.body.user.email,
+      username: res.body.user.username,
       password: '123456',
       token: res.body.token
     };
