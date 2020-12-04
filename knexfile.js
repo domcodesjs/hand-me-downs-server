@@ -1,4 +1,4 @@
-const { DATABASE_URL } = require('./config');
+const { DATABASE_URL, TEST_DATABASE_URL } = require('./config');
 
 module.exports = {
   development: {
@@ -11,9 +11,9 @@ module.exports = {
       directory: __dirname + '/knex/seeds'
     }
   },
-  production: {
+  test: {
     client: 'pg',
-    connection: DATABASE_URL,
+    connection: TEST_DATABASE_URL,
     migrations: {
       directory: __dirname + '/knex/migrations'
     },
