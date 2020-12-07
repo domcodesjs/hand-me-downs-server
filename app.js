@@ -9,7 +9,6 @@ const passport = require('passport');
 const app = express();
 
 app.use(cors());
-app.options('*', cors());
 app.use(helmet());
 app.use(morgan('tiny'));
 
@@ -20,6 +19,17 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(passport.initialize());
 require('./config/passport')(passport);
+
+app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin,X-Requested-With,Content-Type,Accept,content-type,application/json'
+  );
+  next();
+});
 
 app.use('/', require('./routes/index'));
 app.use('/orders', require('./routes/ordersRoutes'));
