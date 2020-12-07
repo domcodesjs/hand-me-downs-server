@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
-// const cors = require('cors');
+const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 const passport = require('passport');
@@ -10,7 +10,7 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// app.use(cors({ origin: '*' }));
+app.use(cors());
 app.use(helmet());
 app.use(morgan('tiny'));
 
@@ -20,18 +20,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 require('./config/passport')(passport);
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET, POST, OPTIONS, PUT, PATCH, DELETE'
-  ); // If needed
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-Requested-With,content-type'
-  ); // If needed
-  next();
-});
 app.use('/', require('./routes/index'));
 app.use('/orders', require('./routes/ordersRoutes'));
 app.use('/users', require('./routes/usersRoutes'));
