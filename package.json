@@ -13,9 +13,6 @@
     "test": "mocha"
   },
   "keywords": [],
-  "engines": {
-    "node": "15.3.0"
-  },
   "author": "",
   "license": "ISC",
   "devDependencies": {
