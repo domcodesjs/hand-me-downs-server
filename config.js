@@ -1,15 +1,9 @@
 require('dotenv').config();
 
 module.exports = {
+  STRIPE_SECRET: process.env.STRIPE_SECRET,
   DATABASE_URL: process.env.DATABASE_URL,
+  LOCAL_DATABASE_URL: process.env.LOCAL_DATABASE_URL,
   TEST_DATABASE_URL: process.env.TEST_DATABASE_URL,
-  DB_URI: process.env.DB_URI,
-  DB_USER: process.env.DB_USER,
-  DB_PASSWORD: process.env.DB_PASSWORD,
-  JWT_SECRET: process.env.JWT_SECRET,
-  SMTP_SERVER: process.env.SMTP_SERVER,
-  SMTP_PORT: process.env.SMTP_PORT,
-  SMTP_USERNAME: process.env.SMTP_USERNAME,
-  SMTP_PASSWORD: process.env.SMTP_PASSWORD,
-  SMTP_SENDER: process.env.SMTP_SENDER
+  JWT_SECRET: process.env.JWT_SECRET
 };

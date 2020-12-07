@@ -1,9 +1,8 @@
 const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET, SMTP_SENDER } = require('../config');
+const { JWT_SECRET } = require('../config');
 const db = require('../knex/knex');
-const transporter = require('../config/transporter');
 
 exports.createUser = async (req, res) => {
   try {
@@ -35,17 +34,6 @@ exports.createUser = async (req, res) => {
       },
       JWT_SECRET
     );
-
-    // extended feature emails! works but gonna implement after I implement user verification email
-    // const welcomeEmail = await transporter.sendMail({
-    //   from: `"Hand Me Downs" <${SMTP_SENDER}>`,
-    //   to: 'dfaulring@gmail.com', // change this out
-    //   subject: 'Welcome to Hand Me Downs!',
-    //   text: 'Account created successfully!',
-    //   html: '<p>Account created successfully!</p>'
-    // });
-
-    // console.log(welcomeEmail);
 
     res.json({
       success: true,
