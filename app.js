@@ -20,6 +20,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 require('./config/passport')(passport);
 
+app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
+  next();
+});
+
 app.use('/', require('./routes/index'));
 app.use('/orders', require('./routes/ordersRoutes'));
 app.use('/users', require('./routes/usersRoutes'));
