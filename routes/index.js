@@ -4,7 +4,7 @@ const router = express.Router();
 router.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'Backend for handmedowns'
+    message: 'Backend for hand me downs'
   });
 });
 

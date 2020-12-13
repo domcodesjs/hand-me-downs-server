@@ -1,12 +1,7 @@
 const app = require('../app');
 const { expect } = require('chai');
 const request = require('supertest');
-const {
-  createTables,
-  dropTables,
-  createUser,
-  createListing
-} = require('./testHelpers');
+const { createTables, dropTables } = require('./testHelpers');
 
 describe('/users', () => {
   it('@POST /users should create a user', async () => {

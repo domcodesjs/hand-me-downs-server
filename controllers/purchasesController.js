@@ -5,7 +5,6 @@ exports.createPurchase = async (req, res) => {
   try {
     const { id } = req.user;
     const { sellers, orderTotal, paymentIntent, address } = req.body;
-    console.log(sellers, orderTotal, paymentIntent, address);
 
     const purchase = (
       await db('purchases')
@@ -30,9 +29,6 @@ exports.createPurchase = async (req, res) => {
     res.json({
       success: true,
       purchase: {
-        items: purchase.purchases_items,
-        shippingAddress: purchase.purchases_shipping_address,
-        total: purchase.purchases_total,
         uid: purchase.purchases_uid
       }
     });

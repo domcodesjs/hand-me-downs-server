@@ -45,7 +45,6 @@ exports.createUser = async (req, res) => {
       token
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       success: false,
       message: 'Server error: Failed to create user.'
