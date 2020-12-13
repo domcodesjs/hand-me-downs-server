@@ -31,17 +31,19 @@ exports.getOrder = async (req, res) => {
   }
 };
 
-// todo
 exports.fulfillOrder = async (req, res) => {
   try {
     const { id } = req.user;
     const { orderId } = req.params;
 
-    const orders = await db('orders')
-      .where({ order_seller: id })
-      .returning('*');
+    const order = (
+      await db('orders')
+        .where({ order_seller: id, order_uid: orderId })
+        .update({ order_status: 'Shipped' })
+        .returning('*')
+    )[0];
 
-    if (!orders) {
+    if (!order) {
       return res.status(400).json({
         success: false
       });
@@ -49,7 +51,7 @@ exports.fulfillOrder = async (req, res) => {
 
     res.json({
       success: true,
-      orders
+      order
     });
   } catch (err) {
     res.status(500).json({
@@ -79,7 +81,6 @@ exports.getOrders = async (req, res) => {
       orders
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       success: false
     });
@@ -100,8 +101,7 @@ exports.getChargeAmount = async (req, res, next) => {
     req.body.itemIds = itemIds;
     next();
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ success: false, err });
+    res.status(500).json({ success: false });
   }
 };
 
@@ -131,8 +131,7 @@ exports.chargeCard = async (req, res, next) => {
 
     next();
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ success: false, err });
+    res.status(500).json({ success: false });
   }
 };
 
@@ -181,7 +180,6 @@ exports.createOrders = async (req, res, next) => {
     req.body.orderTotal = centsTotal / 100;
     next();
   } catch (err) {
-    console.log(err);
     res.status(500).json({ success: false, err });
   }
 };

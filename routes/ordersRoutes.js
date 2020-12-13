@@ -6,7 +6,8 @@ const {
   chargeCard,
   getChargeAmount,
   getOrders,
-  getOrder
+  getOrder,
+  fulfillOrder
 } = require('../controllers/ordersController');
 const { createPurchase } = require('../controllers/purchasesController');
 
@@ -17,13 +18,17 @@ router.get(
   getOrder
 );
 router.post(
+  '/:orderId/fulfill',
+  passport.authenticate('jwt', { session: false }),
+  fulfillOrder
+);
+router.post(
   '/charge',
   passport.authenticate('jwt', { session: false }),
   getChargeAmount,
   chargeCard,
   createOrders,
   createPurchase
-  // createPurchase <--
 );
 
 module.exports = router;
