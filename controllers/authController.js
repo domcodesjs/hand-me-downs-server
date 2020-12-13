@@ -22,17 +22,16 @@ exports.login = async (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        errors: [{ msg: 'Invalid email or password' }]
       });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.user_password);
 
     if (!passwordMatch) {
-      res.status(401);
-      return res.json({
+      return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        errors: [{ msg: 'Invalid email or password' }]
       });
     }
 
@@ -58,7 +57,7 @@ exports.login = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: 'Server error: Failed to login user'
+      errors: [{ msg: 'Server error: Failed to login user' }]
     });
   }
 };

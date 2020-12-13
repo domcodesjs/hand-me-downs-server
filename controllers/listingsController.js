@@ -47,7 +47,9 @@ exports.getLatestListings = async (req, res) => {
         price: 'listing_price',
         sellerUsername: 'user_username'
       })
-      .limit(6);
+      .where('listing_sold', '=', false)
+      .orderBy('listing_created', 'desc')
+      .limit(4);
 
     if (!listings) {
       return res.status(400).json({
@@ -188,6 +190,7 @@ exports.getUserUpdatedListing = async (req, res) => {
         .select({
           title: 'listing_title',
           category: 'listing_category',
+          gender: 'listing_gender',
           description: 'listing_description',
           image: 'listing_image',
           uid: 'listing_uid',
@@ -221,16 +224,19 @@ exports.getUserUpdatedListing = async (req, res) => {
 exports.getUserListings = async (req, res) => {
   try {
     const { id } = req.user;
-    const listings = await db('listings').where({ listing_user: id }).select({
-      title: 'listing_title',
-      price: 'listing_price',
-      created: 'listing_created',
-      image: 'listing_image',
-      slug: 'listing_slug',
-      uid: 'listing_uid',
-      sold: 'listing_sold',
-      username: 'listing_user'
-    });
+    const listings = await db('listings')
+      .where({ listing_user: id })
+      .select({
+        title: 'listing_title',
+        price: 'listing_price',
+        created: 'listing_created',
+        image: 'listing_image',
+        slug: 'listing_slug',
+        uid: 'listing_uid',
+        sold: 'listing_sold',
+        username: 'listing_user'
+      })
+      .orderBy('listing_created', 'desc');
 
     if (!listings) {
       return res
@@ -381,7 +387,8 @@ exports.getListings = async (req, res) => {
       slug: 'listing_slug',
       uid: 'listing_uid',
       price: 'listing_price',
-      sold: 'listing_sold'
+      sold: 'listing_sold',
+      image: 'listing_image'
     });
 
     if (!listings) {

@@ -65,7 +65,8 @@ exports.getOrders = async (req, res) => {
 
     const orders = await db('orders')
       .where({ order_seller: id })
-      .returning('*');
+      .returning('*')
+      .orderBy('order_created', 'desc');
 
     if (!orders) {
       return res.status(400).json({

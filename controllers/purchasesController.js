@@ -50,7 +50,8 @@ exports.getPurchases = async (req, res) => {
 
     const purchases = await db('purchases')
       .where({ purchases_buyer: id })
-      .returning('*');
+      .returning('*')
+      .orderBy('purchases_created', 'desc');
 
     if (!purchases) {
       return res.status(400).json({
