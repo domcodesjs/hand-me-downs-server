@@ -26,7 +26,7 @@ exports.resize = async (req, res, next) => {
   const extension = req.file.mimetype.split('/')[1];
   req.body.image = `${uuid()}.${extension}`;
   const image = await jimp.read(req.file.buffer);
-  image.resize(800, jimp.AUTO);
+  image.resize(800, 1000);
   image.write(`./public/uploads/images/${req.body.image}`);
   next();
 };
@@ -63,7 +63,6 @@ exports.getLatestListings = async (req, res) => {
       listings
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       success: false,
       message: 'Server error could not get listing'
@@ -102,7 +101,6 @@ exports.createListing = async (req, res) => {
       listing
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json(err);
   }
 };
@@ -131,7 +129,6 @@ exports.listingExists = async (req, res) => {
       }
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       success: false,
       message: 'Server error could not get listing'
@@ -172,7 +169,6 @@ exports.getListing = async (req, res) => {
       listing
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       success: false,
       message: 'Server error could not get listing'
@@ -248,9 +244,7 @@ exports.getUserListings = async (req, res) => {
       success: true,
       listings
     });
-  } catch (err) {
-    console.log(err);
-  }
+  } catch (err) {}
 };
 
 exports.deleteListing = async (req, res) => {
@@ -277,7 +271,6 @@ exports.deleteListing = async (req, res) => {
       uid: deletedListing
     });
   } catch (err) {
-    console.log(err);
     res.status(400).json({
       message: 'Failed to delete listing'
     });
@@ -322,9 +315,7 @@ exports.updateListing = async (req, res) => {
       success: true,
       listing
     });
-  } catch (err) {
-    console.log(err);
-  }
+  } catch (err) {}
 };
 
 exports.getShopListings = async (req, res) => {
@@ -363,7 +354,8 @@ exports.getShopListings = async (req, res) => {
         createdAt: 'listing_created',
         sold: 'listing_sold',
         username: 'user_username'
-      });
+      })
+      .orderBy('listing_created', 'desc');
 
     res.json({
       success: true,
@@ -380,16 +372,19 @@ exports.getShopListings = async (req, res) => {
 exports.getListings = async (req, res) => {
   try {
     const { title, category, gender } = req.query;
-    let listings = await db('listings').where({ listing_sold: false }).select({
-      title: 'listing_title',
-      category: 'listing_category',
-      gender: 'listing_gender',
-      slug: 'listing_slug',
-      uid: 'listing_uid',
-      price: 'listing_price',
-      sold: 'listing_sold',
-      image: 'listing_image'
-    });
+    let listings = await db('listings')
+      .where({ listing_sold: false })
+      .select({
+        title: 'listing_title',
+        category: 'listing_category',
+        gender: 'listing_gender',
+        slug: 'listing_slug',
+        uid: 'listing_uid',
+        price: 'listing_price',
+        sold: 'listing_sold',
+        image: 'listing_image'
+      })
+      .orderBy('listing_created', 'desc');
 
     if (!listings) {
       return res
@@ -425,7 +420,6 @@ exports.getListings = async (req, res) => {
       listings: filteredListings
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
