@@ -10,6 +10,20 @@ Hand Me Downs is a ficticious marketplace where you can buy and sell used clothi
 
 The backend of Hand Me Downs uses Node, Express and Postgres and is hosted on Heroku.
 
+## Important Info
+
+### Test Accounts
+
+- email: testuser1@example.com pw: thinkful
+- email: testuser2@example.com pw: thinkful
+- email: testuser3@example.com pw: thinkful
+
+### Test Credit Card
+
+- Card #: 4242 4242 4242 4242
+- Expiration: Anything after today.
+- CVC: Any 3 digit number
+
 ## API Endpoints
 
 ### Root Routes
