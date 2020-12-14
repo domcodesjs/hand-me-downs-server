@@ -1,12 +1,7 @@
 const app = require('../app');
 const { expect } = require('chai');
 const request = require('supertest');
-const {
-  createTables,
-  dropTables,
-  createUser,
-  createListing
-} = require('./testHelpers');
+const { createTables, dropTables, createUser } = require('./testHelpers');
 
 describe('/auth', () => {
   it('/auth/login should log a user in', async () => {

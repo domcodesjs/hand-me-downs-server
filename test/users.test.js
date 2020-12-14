@@ -7,6 +7,7 @@ describe('/users', () => {
   it('@POST /users should create a user', async () => {
     await dropTables();
     await createTables();
+
     return request(app)
       .post('/users')
       .send({

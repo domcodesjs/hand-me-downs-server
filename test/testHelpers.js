@@ -21,6 +21,17 @@ exports.createListing = async (token) => {
   }
 };
 
+exports.getPurchases = async (token) => {
+  try {
+    const res = await request(app)
+      .get('/purchases')
+      .set({ Authorization: `Bearer ${token}`, Accept: 'application/json' });
+    return res.body;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.createUser = async () => {
   try {
     const res = await request(app)
