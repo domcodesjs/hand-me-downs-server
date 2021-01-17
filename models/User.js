@@ -34,4 +34,8 @@ User.pre('save', async function (next) {
   return next();
 });
 
+User.methods.validatePassword = async function validatePassword(password) {
+  return bcrypt.compare(password, this.password);
+};
+
 module.exports = mongoose.model('User', User);

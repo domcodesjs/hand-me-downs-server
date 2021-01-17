@@ -1,10 +1,26 @@
 require('dotenv').config();
+const mongoose = require('mongoose');
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 const passport = require('passport');
+const { MONGODB_URL } = require('./config');
+
+const connectToDatabase = async () => {
+  try {
+    await mongoose.connect(MONGODB_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    console.log('Connected to MongoDB');
+  } catch (err) {
+    console.log('Failed to connect to MongoDB', err);
+  }
+};
+connectToDatabase();
+require('./models/User');
 
 const app = express();
 

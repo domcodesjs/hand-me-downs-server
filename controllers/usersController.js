@@ -1,10 +1,9 @@
-const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config');
-const db = require('../knex/knex');
+const { insertUser } = require('../services/userService');
 
-exports.createUser = async (req, res) => {
+exports.register = async (req, res) => {
   try {
     const errors = validationResult(req);
 
@@ -13,24 +12,14 @@ exports.createUser = async (req, res) => {
     }
 
     const { email, username, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = (
-      await db('users')
-        .insert({
-          user_email: email.trim().toLowerCase(),
-          user_username: username.trim().toLowerCase(),
-          user_password: hashedPassword
-        })
-        .returning(['id', 'user_email', 'user_username', 'user_role'])
-    )[0];
+    const user = await insertUser(email, username, password);
 
     const token = jwt.sign(
       {
         id: user.id,
-        email: user.user_email,
-        username: user.user_username,
-        role: user.user_role
+        email: user.email,
+        username: user.username,
+        admin: user.admin
       },
       JWT_SECRET
     );
@@ -38,9 +27,8 @@ exports.createUser = async (req, res) => {
     res.json({
       success: true,
       user: {
-        email: user.user_email,
-        username: user.user_username,
-        role: user.user_role
+        email: user.email,
+        username: user.username
       },
       token
     });
