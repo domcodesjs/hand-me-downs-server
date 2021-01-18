@@ -1,12 +1,35 @@
 const shortid = require('shortid');
 const slugify = require('slugify');
 const multer = require('multer');
-const jimp = require('jimp');
+const multerS3 = require('multer-s3');
+// const jimp = require('jimp');
+const aws = require('aws-sdk');
+const s3 = new aws.S3();
 const db = require('../knex/knex');
 const { v4: uuid } = require('uuid');
 
-const multerOptions = {
-  storage: multer.memoryStorage(),
+// const multerOptions = {
+//   storage: multer.memoryStorage(),
+//   fileFilter(_, file, next) {
+//     const isImage = file.mimetype.startsWith('image/');
+//     if (isImage) {
+//       next(null, true);
+//     } else {
+//       next({ message: 'That filetype is not allowed' }, false);
+//     }
+//   }
+// };
+
+exports.uploadImage = multer({
+  storage: multerS3({
+    s3,
+    bucket: 'gaming-social-network',
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    acl: 'public-read',
+    key: function (req, file, cb) {
+      cb(null, uuid() + path.extname(file.originalname));
+    }
+  }),
   fileFilter(_, file, next) {
     const isImage = file.mimetype.startsWith('image/');
     if (isImage) {
@@ -15,21 +38,21 @@ const multerOptions = {
       next({ message: 'That filetype is not allowed' }, false);
     }
   }
-};
+}).single('image');
 
 exports.upload = multer(multerOptions).single('image');
 
-exports.resize = async (req, res, next) => {
-  if (!req.file) {
-    return next();
-  }
-  const extension = req.file.mimetype.split('/')[1];
-  req.body.image = `${uuid()}.${extension}`;
-  const image = await jimp.read(req.file.buffer);
-  image.resize(800, 1000);
-  image.write(`./public/uploads/images/${req.body.image}`);
-  next();
-};
+// exports.resize = async (req, res, next) => {
+//   if (!req.file) {
+//     return next();
+//   }
+//   const extension = req.file.mimetype.split('/')[1];
+//   req.body.image = `${uuid()}.${extension}`;
+//   const image = await jimp.read(req.file.buffer);
+//   image.resize(800, 1000);
+//   image.write(`./public/uploads/images/${req.body.image}`);
+//   next();
+// };
 
 exports.getLatestListings = async (req, res) => {
   try {

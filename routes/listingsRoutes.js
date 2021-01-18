@@ -73,7 +73,7 @@ router.get(
 router.post(
   '/',
   passport.authenticate('jwt', { session: false }),
-  upload,
+  uploadImage,
   async (req, res, next) => {
     req.body = await JSON.parse(JSON.stringify(req.body, null));
     next();
@@ -100,7 +100,7 @@ router.post(
     }
     next();
   },
-  resize,
+  // resize,
   createListing
 );
 
