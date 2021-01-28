@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "env NODE_ENV=production node index.js",
     "dev": "env NODE_ENV=development nodemon index.js",
     "migrate": "env NODE_ENV=development postgrator --config postgrator-config.js",
     "migrate:test": "env NODE_ENV=test npm run migrate",
