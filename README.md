@@ -1,6 +1,6 @@
 # Hand Me Downs Server
 
-[Link to Live Site](https://handmedowns-client.herokuapp.com/)
+[Link to Live Site](https://production.d10q5fixpcxb4q.amplifyapp.com)
 
 ## Summary
 
