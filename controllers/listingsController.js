@@ -56,34 +56,34 @@ exports.upload = multer(multerOptions).single('image');
 
 exports.getLatestListings = async (req, res) => {
   try {
-    const listings = await db('listings')
-      .join('users', { 'users.id': 'listings.listing_user' })
-      .select({
-        title: 'listing_title',
-        category: 'listing_category',
-        description: 'listing_description',
-        image: 'listing_image',
-        uid: 'listing_uid',
-        sold: 'listing_sold',
-        created: 'listing_created',
-        slug: 'listing_slug',
-        price: 'listing_price',
-        sellerUsername: 'user_username'
-      })
-      .where('listing_sold', '=', false)
-      .orderBy('listing_created', 'desc')
-      .limit(4);
+    // const listings = await db('listings')
+    //   .join('users', { 'users.id': 'listings.listing_user' })
+    //   .select({
+    //     title: 'listing_title',
+    //     category: 'listing_category',
+    //     description: 'listing_description',
+    //     image: 'listing_image',
+    //     uid: 'listing_uid',
+    //     sold: 'listing_sold',
+    //     created: 'listing_created',
+    //     slug: 'listing_slug',
+    //     price: 'listing_price',
+    //     sellerUsername: 'user_username'
+    //   })
+    //   .where('listing_sold', '=', false)
+    //   .orderBy('listing_created', 'desc')
+    //   .limit(4);
 
-    if (!listings) {
-      return res.status(400).json({
-        success: false,
-        message: 'That listing does not exist'
-      });
-    }
+    // if (!listings) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'That listing does not exist'
+    //   });
+    // }
 
     res.json({
       success: true,
-      listings
+      listings: []
     });
   } catch (err) {
     res.status(500).json({
