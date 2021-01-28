@@ -1,35 +1,12 @@
 const shortid = require('shortid');
 const slugify = require('slugify');
 const multer = require('multer');
-const multerS3 = require('multer-s3');
-// const jimp = require('jimp');
-const aws = require('aws-sdk');
-const s3 = new aws.S3();
+const jimp = require('jimp');
 const db = require('../knex/knex');
 const { v4: uuid } = require('uuid');
 
-// const multerOptions = {
-//   storage: multer.memoryStorage(),
-//   fileFilter(_, file, next) {
-//     const isImage = file.mimetype.startsWith('image/');
-//     if (isImage) {
-//       next(null, true);
-//     } else {
-//       next({ message: 'That filetype is not allowed' }, false);
-//     }
-//   }
-// };
-
-exports.uploadImage = multer({
-  storage: multerS3({
-    s3,
-    bucket: 'gaming-social-network',
-    contentType: multerS3.AUTO_CONTENT_TYPE,
-    acl: 'public-read',
-    key: function (req, file, cb) {
-      cb(null, uuid() + path.extname(file.originalname));
-    }
-  }),
+const multerOptions = {
+  storage: multer.memoryStorage(),
   fileFilter(_, file, next) {
     const isImage = file.mimetype.startsWith('image/');
     if (isImage) {
@@ -38,52 +15,52 @@ exports.uploadImage = multer({
       next({ message: 'That filetype is not allowed' }, false);
     }
   }
-}).single('image');
+};
 
 exports.upload = multer(multerOptions).single('image');
 
-// exports.resize = async (req, res, next) => {
-//   if (!req.file) {
-//     return next();
-//   }
-//   const extension = req.file.mimetype.split('/')[1];
-//   req.body.image = `${uuid()}.${extension}`;
-//   const image = await jimp.read(req.file.buffer);
-//   image.resize(800, 1000);
-//   image.write(`./public/uploads/images/${req.body.image}`);
-//   next();
-// };
+exports.resize = async (req, res, next) => {
+  if (!req.file) {
+    return next();
+  }
+  const extension = req.file.mimetype.split('/')[1];
+  req.body.image = `${uuid()}.${extension}`;
+  const image = await jimp.read(req.file.buffer);
+  image.resize(800, 1000);
+  image.write(`./public/uploads/images/${req.body.image}`);
+  next();
+};
 
 exports.getLatestListings = async (req, res) => {
   try {
-    // const listings = await db('listings')
-    //   .join('users', { 'users.id': 'listings.listing_user' })
-    //   .select({
-    //     title: 'listing_title',
-    //     category: 'listing_category',
-    //     description: 'listing_description',
-    //     image: 'listing_image',
-    //     uid: 'listing_uid',
-    //     sold: 'listing_sold',
-    //     created: 'listing_created',
-    //     slug: 'listing_slug',
-    //     price: 'listing_price',
-    //     sellerUsername: 'user_username'
-    //   })
-    //   .where('listing_sold', '=', false)
-    //   .orderBy('listing_created', 'desc')
-    //   .limit(4);
+    const listings = await db('listings')
+      .join('users', { 'users.id': 'listings.listing_user' })
+      .select({
+        title: 'listing_title',
+        category: 'listing_category',
+        description: 'listing_description',
+        image: 'listing_image',
+        uid: 'listing_uid',
+        sold: 'listing_sold',
+        created: 'listing_created',
+        slug: 'listing_slug',
+        price: 'listing_price',
+        sellerUsername: 'user_username'
+      })
+      .where('listing_sold', '=', false)
+      .orderBy('listing_created', 'desc')
+      .limit(4);
 
-    // if (!listings) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: 'That listing does not exist'
-    //   });
-    // }
+    if (!listings) {
+      return res.status(400).json({
+        success: false,
+        message: 'That listing does not exist'
+      });
+    }
 
     res.json({
       success: true,
-      listings: []
+      listings
     });
   } catch (err) {
     res.status(500).json({
