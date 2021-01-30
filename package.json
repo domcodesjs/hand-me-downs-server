@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "env NODE_ENV=production node index.js",
     "dev": "env NODE_ENV=development nodemon index.js",
     "migrate": "env NODE_ENV=development postgrator --config postgrator-config.js",
     "migrate:test": "env NODE_ENV=test npm run migrate",
@@ -34,6 +34,7 @@
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.8",
     "mocha": "^8.2.1",
+    "mongoose": "^5.11.12",
     "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "multer-s3": "^2.9.0",

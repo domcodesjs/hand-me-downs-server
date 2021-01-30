@@ -5,5 +5,6 @@ module.exports = {
   DATABASE_URL: process.env.DATABASE_URL,
   LOCAL_DATABASE_URL: process.env.LOCAL_DATABASE_URL,
   TEST_DATABASE_URL: process.env.TEST_DATABASE_URL,
-  JWT_SECRET: process.env.JWT_SECRET
+  JWT_SECRET: process.env.JWT_SECRET,
+  MONGODB_URL: process.env.MONGODB_URL
 };
