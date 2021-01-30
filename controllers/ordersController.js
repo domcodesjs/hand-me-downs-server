@@ -1,4 +1,4 @@
-const db = require('../knex/knex');
+const db = null;
 const { nanoid } = require('nanoid');
 const stripe = require('stripe')(process.env.STRIPE_SECRET);
 

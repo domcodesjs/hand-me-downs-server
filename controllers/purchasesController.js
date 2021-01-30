@@ -1,5 +1,5 @@
 const { nanoid } = require('nanoid');
-const db = require('../knex/knex');
+const db = null;
 
 exports.createPurchase = async (req, res) => {
   try {

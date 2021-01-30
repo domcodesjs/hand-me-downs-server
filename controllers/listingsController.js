@@ -2,7 +2,7 @@ const shortid = require('shortid');
 const slugify = require('slugify');
 const multer = require('multer');
 const jimp = require('jimp');
-const db = require('../knex/knex');
+const db = null;
 const { v4: uuid } = require('uuid');
 
 const multerOptions = {

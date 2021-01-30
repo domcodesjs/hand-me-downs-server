@@ -1,4 +1,4 @@
-const db = require('../knex/knex');
+const db = null;
 
 exports.getCategories = async (req, res) => {
   try {
