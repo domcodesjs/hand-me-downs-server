@@ -6,11 +6,11 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 const passport = require('passport');
-const { MONGODB_URL } = require('./config');
+const { DB_URL } = require('./config');
 
 const connectToDatabase = async () => {
   try {
-    await mongoose.connect(MONGODB_URL, {
+    await mongoose.connect(DB_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true
     });
