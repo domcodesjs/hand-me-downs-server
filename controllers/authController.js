@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const { retrieveUserByEmail } = require('../services/userService');
+const { retrieveUserByEmail } = require('../services/usersService');
 const { JWT_SECRET } = require('../config');
 
 exports.isAdmin = async (req, res) => {};

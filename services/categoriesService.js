@@ -37,16 +37,13 @@ exports.removeCategory = async (categoryId) => {
 
 exports.modifyCategory = async (categoryId, name) => {
   try {
-    console.log(categoryId);
-    const category = await Category.findOneAndUpdate(
-      { _id: categoryId },
-      { $set: { name } }
+    const category = await Category.findByIdAndUpdate(
+      categoryId,
+      {
+        $set: { name }
+      },
+      { runValidators: true, new: true }
     );
-
-    // const listing = await Listing.findOneAndUpdate(
-    //   { _id: listingId, user: user.id },
-    //   { $set: data }
-    // );
 
     return category;
   } catch (err) {

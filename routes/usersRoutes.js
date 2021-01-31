@@ -5,7 +5,7 @@ const { register } = require('../controllers/usersController');
 const {
   retrieveUserByEmail,
   retrieveUserByUsername
-} = require('../services/userService');
+} = require('../services/usersService');
 
 router.post(
   '/',

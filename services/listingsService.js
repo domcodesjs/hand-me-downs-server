@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Listing = mongoose.model('Listing');
 const slugify = require('slugify');
-const { retrieveUserByUsername } = require('./userService');
+const { retrieveUserByUsername } = require('./usersService');
 
 exports.insertListing = async (user, data) => {
   try {
@@ -80,7 +80,10 @@ exports.modifyListing = async (user, listingId, data) => {
   try {
     const listing = await Listing.findOneAndUpdate(
       { _id: listingId, user: user.id },
-      { $set: data }
+      { $set: data },
+      {
+        new: true
+      }
     );
     return listing;
   } catch (err) {

@@ -6,11 +6,7 @@ const Order = new Schema({
     type: Number,
     required: true
   },
-  items: {
-    type: [Schema.Types.ObjectId],
-    ref: 'Listing',
-    required: true
-  },
+  items: [{ type: Schema.Types.ObjectId, ref: 'Listing', required: true }],
   shipping_address: {
     type: String,
     required: true
