@@ -1,23 +1,19 @@
 const db = null;
 const { nanoid } = require('nanoid');
+const {
+  insertOrder,
+  retrieveOrders,
+  retrieveOrder,
+  markOrderAsFulfilled
+} = require('../services/ordersService');
 const stripe = require('stripe')(process.env.STRIPE_SECRET);
 
 exports.getOrder = async (req, res) => {
   try {
-    const { id } = req.user;
+    const user = req.user;
     const { orderId } = req.params;
 
-    const order = (
-      await db('orders')
-        .where({ order_seller: id, order_uid: orderId })
-        .returning('*')
-    )[0];
-
-    if (!order) {
-      return res.status(400).json({
-        success: false
-      });
-    }
+    const order = await retrieveOrder(user, orderId);
 
     res.json({
       success: true,
@@ -26,28 +22,17 @@ exports.getOrder = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      errors: [{ msg: err.message }]
     });
   }
 };
 
 exports.fulfillOrder = async (req, res) => {
   try {
-    const { id } = req.user;
+    const user = req.user;
     const { orderId } = req.params;
 
-    const order = (
-      await db('orders')
-        .where({ order_seller: id, order_uid: orderId })
-        .update({ order_status: 'Shipped' })
-        .returning('*')
-    )[0];
-
-    if (!order) {
-      return res.status(400).json({
-        success: false
-      });
-    }
+    const order = await markOrderAsFulfilled(user, orderId);
 
     res.json({
       success: true,
@@ -63,18 +48,8 @@ exports.fulfillOrder = async (req, res) => {
 
 exports.getOrders = async (req, res) => {
   try {
-    const { id } = req.user;
-
-    const orders = await db('orders')
-      .where({ order_seller: id })
-      .returning('*')
-      .orderBy('order_created', 'desc');
-
-    if (!orders) {
-      return res.status(400).json({
-        success: false
-      });
-    }
+    const user = req.user;
+    const orders = await retrieveOrders(user);
 
     res.json({
       success: true,
@@ -82,7 +57,8 @@ exports.getOrders = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({
-      success: false
+      success: false,
+      errors: [{ msg: err.message }]
     });
   }
 };
