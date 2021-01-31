@@ -14,6 +14,7 @@ exports.insertListing = async (user, data) => {
 
     return listing;
   } catch (err) {
+    console.log(err);
     throw Error('Could not insert listing');
   }
 };

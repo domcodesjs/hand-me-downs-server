@@ -47,12 +47,10 @@ const Listing = new Schema({
   }
 });
 
-// Duplicate the ID field.
 Listing.virtual('id').get(function () {
   return this._id.toHexString();
 });
 
-// Ensure virtual fields are serialised.
 Listing.set('toJSON', {
   virtuals: true
 });

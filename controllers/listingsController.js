@@ -42,7 +42,7 @@ exports.createListing = async (req, res) => {
       category,
       gender: gender.toLowerCase(),
       description,
-      price,
+      price: Math.round(100 * parseFloat(price)),
       image
     });
 
@@ -155,7 +155,7 @@ exports.updateListing = async (req, res) => {
       description,
       gender,
       category,
-      price
+      price: Math.round(100 * parseFloat(price))
     };
 
     const { listingId } = req.params;
