@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const User = mongoose.model('User');
 const Listing = mongoose.model('Listing');
 const slugify = require('slugify');
 const { retrieveUserByUsername } = require('./userService');
@@ -15,17 +14,16 @@ exports.insertListing = async (user, data) => {
 
     return listing;
   } catch (err) {
-    console.log(err);
+    throw Error('Could not insert listing');
   }
 };
 
 exports.checkIfListingExists = async (listingId) => {
   try {
     const listing = await Listing.findById(listingId, 'id slug');
-    console.log(listing);
     return listing;
   } catch (err) {
-    console.log(err);
+    throw Error('Could not retrieve listing');
   }
 };
 
@@ -34,7 +32,7 @@ exports.retrieveListings = async () => {
     const listings = await Listing.find();
     return listings;
   } catch (err) {
-    console.log(err);
+    throw Error('Could not retrieve listings');
   }
 };
 
@@ -46,7 +44,7 @@ exports.retrieveListing = async (listingId) => {
     );
     return listing;
   } catch (err) {
-    console.log(err);
+    throw Error('Could not retrieve listing');
   }
 };
 
@@ -54,10 +52,18 @@ exports.retrieveShopListings = async (username) => {
   try {
     const user = await retrieveUserByUsername(username);
     const listings = await Listing.find({ user: user._id });
-
     return listings;
   } catch (err) {
     throw Error('Shop does not exist');
+  }
+};
+
+exports.retrieveUserListings = async (user) => {
+  try {
+    const listings = await Listing.find({ user: user.id });
+    return listings;
+  } catch (err) {
+    throw Error('Could not retrieve your listings');
   }
 };
 
@@ -70,5 +76,17 @@ exports.modifyListing = async (user, listingId, data) => {
     return listing;
   } catch (err) {
     throw Error('Could not update listing');
+  }
+};
+
+exports.removeListing = async (user, listingId) => {
+  try {
+    const listing = await Listing.findOneAndDelete({
+      _id: listingId,
+      user: user.id
+    });
+    return listing;
+  } catch (err) {
+    throw Error('Could not delete listing');
   }
 };

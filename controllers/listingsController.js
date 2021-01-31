@@ -8,7 +8,9 @@ const {
   checkIfListingExists,
   retrieveListings,
   retrieveShopListings,
-  modifyListing
+  modifyListing,
+  removeListing,
+  retrieveUserListings
 } = require('../services/listingsService');
 
 const multerOptions = {
@@ -73,18 +75,15 @@ exports.createListing = async (req, res) => {
       image
     });
 
-    if (!listing) {
-      return res.status(400).json({
-        message: 'Could not create listing'
-      });
-    }
-
     res.json({
       success: true,
       listing
     });
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({
+      success: false,
+      errors: [{ msg: err.message }]
+    });
   }
 };
 
@@ -93,13 +92,6 @@ exports.listingExists = async (req, res) => {
     const { listingId } = req.params;
     const listing = await checkIfListingExists(listingId);
 
-    if (!listing) {
-      return res.status(400).json({
-        success: false,
-        message: 'That listing does not exist'
-      });
-    }
-
     res.json({
       success: true,
       listing
@@ -107,7 +99,7 @@ exports.listingExists = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: 'Server error could not get listing'
+      errors: [{ msg: err.message }]
     });
   }
 };
@@ -117,13 +109,6 @@ exports.getListing = async (req, res) => {
     const { listingId } = req.params;
     const listing = await retrieveListing(listingId);
 
-    if (!listing) {
-      return res.status(400).json({
-        success: false,
-        message: 'That listing does not exist'
-      });
-    }
-
     res.json({
       success: true,
       listing
@@ -131,7 +116,7 @@ exports.getListing = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: 'Server error could not get listing'
+      errors: [{ msg: err.message }]
     });
   }
 };
@@ -157,14 +142,6 @@ exports.getUserUpdatedListing = async (req, res) => {
         })
     )[0];
 
-    if (!listing) {
-      return res.status(400).json({
-        success: false,
-        message:
-          'Listing does not exist or you do not have permission to edit this listing'
-      });
-    }
-
     res.json({
       success: true,
       listing
@@ -172,67 +149,44 @@ exports.getUserUpdatedListing = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: 'Server error could not get listing'
+      errors: [{ msg: err.message }]
     });
   }
 };
 
 exports.getUserListings = async (req, res) => {
   try {
-    const { id } = req.user;
-    const listings = await db('listings')
-      .where({ listing_user: id })
-      .select({
-        title: 'listing_title',
-        price: 'listing_price',
-        created: 'listing_created',
-        image: 'listing_image',
-        slug: 'listing_slug',
-        uid: 'listing_uid',
-        sold: 'listing_sold',
-        username: 'listing_user'
-      })
-      .orderBy('listing_created', 'desc');
-
-    if (!listings) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Could not get user listings' });
-    }
+    const user = req.user;
+    const listings = await retrieveUserListings(user);
 
     res.json({
       success: true,
       listings
     });
-  } catch (err) {}
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      errors: [{ msg: err.message }]
+    });
+  }
 };
 
 exports.deleteListing = async (req, res) => {
   try {
     const { listingId } = req.params;
-    const { id } = req.user;
-    const deletedListing = (
-      await db('listings')
-        .where({ listing_user: id, listing_uid: listingId })
-        .delete()
-        .returning('listing_uid')
-    )[0];
-
-    if (!deletedListing) {
-      return res.status(400).json({
-        success: false,
-        message: 'Failed to delete listing'
-      });
-    }
+    const user = req.user;
+    const deletedListing = await removeListing(user, listingId);
 
     res.json({
       success: true,
       message: 'Succesfully deleted listing',
-      uid: deletedListing
+      listing: {
+        id: deletedListing._id
+      }
     });
   } catch (err) {
     res.status(400).json({
-      message: 'Failed to delete listing'
+      message: [{ msg: err.msg }]
     });
   }
 };
@@ -291,12 +245,6 @@ exports.getListings = async (req, res) => {
     const { title, category, gender } = req.query;
     let listings = await retrieveListings();
 
-    if (!listings) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Could not get listings' });
-    }
-
     let filteredListings = listings;
 
     if (title && title.trim('').length) {
@@ -325,6 +273,9 @@ exports.getListings = async (req, res) => {
       listings: filteredListings
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({
+      success: false,
+      errors: [{ msg: err.message }]
+    });
   }
 };
