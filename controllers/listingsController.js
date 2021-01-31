@@ -1,9 +1,15 @@
-const shortid = require('shortid');
-const slugify = require('slugify');
 const multer = require('multer');
 const jimp = require('jimp');
 const db = null;
 const { v4: uuid } = require('uuid');
+const {
+  insertListing,
+  retrieveListing,
+  checkIfListingExists,
+  retrieveListings,
+  retrieveShopListings,
+  modifyListing
+} = require('../services/listingsService');
 
 const multerOptions = {
   storage: multer.memoryStorage(),
@@ -33,23 +39,7 @@ exports.resize = async (req, res, next) => {
 
 exports.getLatestListings = async (req, res) => {
   try {
-    const listings = await db('listings')
-      .join('users', { 'users.id': 'listings.listing_user' })
-      .select({
-        title: 'listing_title',
-        category: 'listing_category',
-        description: 'listing_description',
-        image: 'listing_image',
-        uid: 'listing_uid',
-        sold: 'listing_sold',
-        created: 'listing_created',
-        slug: 'listing_slug',
-        price: 'listing_price',
-        sellerUsername: 'user_username'
-      })
-      .where('listing_sold', '=', false)
-      .orderBy('listing_created', 'desc')
-      .limit(4);
+    const listings = await retrieveListings();
 
     if (!listings) {
       return res.status(400).json({
@@ -72,23 +62,16 @@ exports.getLatestListings = async (req, res) => {
 
 exports.createListing = async (req, res) => {
   try {
-    const { id } = req.user;
+    const user = req.user;
     const { title, description, price, image, category, gender } = req.body;
-    const listing = (
-      await db('listings')
-        .insert({
-          listing_title: title,
-          listing_category: category,
-          listing_gender: gender.toLowerCase(),
-          listing_description: description,
-          listing_price: price,
-          listing_image: image,
-          listing_slug: await slugify(title, { lower: true }),
-          listing_uid: shortid.generate(),
-          listing_user: id
-        })
-        .returning('*')
-    )[0];
+    const listing = await insertListing(user, {
+      title,
+      category,
+      gender: gender.toLowerCase(),
+      description,
+      price,
+      image
+    });
 
     if (!listing) {
       return res.status(400).json({
@@ -108,11 +91,7 @@ exports.createListing = async (req, res) => {
 exports.listingExists = async (req, res) => {
   try {
     const { listingId } = req.params;
-    const listing = (
-      await db('listings')
-        .where({ listing_uid: listingId })
-        .select('listing_uid', 'listing_slug')
-    )[0];
+    const listing = await checkIfListingExists(listingId);
 
     if (!listing) {
       return res.status(400).json({
@@ -123,10 +102,7 @@ exports.listingExists = async (req, res) => {
 
     res.json({
       success: true,
-      listing: {
-        uid: listing.listing_uid,
-        slug: listing.listing_slug
-      }
+      listing
     });
   } catch (err) {
     res.status(500).json({
@@ -139,23 +115,7 @@ exports.listingExists = async (req, res) => {
 exports.getListing = async (req, res) => {
   try {
     const { listingId } = req.params;
-    const listing = (
-      await db('listings')
-        .where({ listing_uid: listingId })
-        .join('users', { 'users.id': 'listings.listing_user' })
-        .select({
-          title: 'listing_title',
-          category: 'listing_category',
-          description: 'listing_description',
-          image: 'listing_image',
-          uid: 'listing_uid',
-          sold: 'listing_sold',
-          created: 'listing_created',
-          slug: 'listing_slug',
-          price: 'listing_price',
-          sellerUsername: 'user_username'
-        })
-    )[0];
+    const listing = await retrieveListing(listingId);
 
     if (!listing) {
       return res.status(400).json({
@@ -281,90 +241,47 @@ exports.updateListing = async (req, res) => {
   try {
     const { title, description, category, gender, price, image } = req.body;
     const updatedListing = {
-      listing_title: title,
-      listing_description: description,
-      listing_gender: gender,
-      listing_category: category,
-      listing_price: price
+      title,
+      description,
+      gender,
+      category,
+      price
     };
+
     const { listingId } = req.params;
-    const { id } = req.user;
+    const user = req.user;
 
     if (image && image !== 'undefined') {
       updatedListing['listing_image'] = req.body.image;
     }
 
-    const listing = (
-      await db('listings')
-        .where({
-          listing_user: id,
-          listing_uid: listingId
-        })
-        .update(updatedListing)
-        .returning('*')
-    )[0];
-
-    if (!listing) {
-      return res.status(400).json({
-        success: false,
-        message: 'Failed to update listing'
-      });
-    }
+    const listing = await modifyListing(user, listingId, updatedListing);
 
     res.json({
       success: true,
       listing
     });
-  } catch (err) {}
+  } catch (err) {
+    res.status(500).json({
+      sucess: false,
+      errors: [{ msg: err.message }]
+    });
+  }
 };
 
 exports.getShopListings = async (req, res) => {
   try {
     const { username } = req.params;
-
-    const user = (
-      await db('users').where({
-        user_username: username.toLowerCase().trimEnd()
-      })
-    )[0];
-
-    if (!user) {
-      return res.status(400).json({
-        sucess: false,
-        message: 'Shop does not exist'
-      });
-    }
-
-    const listings = await db('listings')
-      .join('users', {
-        'users.id': 'listings.listing_user'
-      })
-      .where({
-        listing_sold: false,
-        'users.user_username': username.toLowerCase().trimEnd()
-      })
-      .select({
-        title: 'listing_title',
-        category: 'listing_category',
-        description: 'listing_description',
-        image: 'listing_image',
-        slug: 'listing_slug',
-        uid: 'listing_uid',
-        price: 'listing_price',
-        createdAt: 'listing_created',
-        sold: 'listing_sold',
-        username: 'user_username'
-      })
-      .orderBy('listing_created', 'desc');
+    const listings = await retrieveShopListings(username, res);
 
     res.json({
       success: true,
       listings
     });
   } catch (err) {
-    return res.status(500).json({
+    res.status(500).json({
       sucess: false,
-      message: 'Could not load shop'
+      errors: [{ msg: err.message }]
     });
   }
 };
@@ -372,19 +289,7 @@ exports.getShopListings = async (req, res) => {
 exports.getListings = async (req, res) => {
   try {
     const { title, category, gender } = req.query;
-    let listings = await db('listings')
-      .where({ listing_sold: false })
-      .select({
-        title: 'listing_title',
-        category: 'listing_category',
-        gender: 'listing_gender',
-        slug: 'listing_slug',
-        uid: 'listing_uid',
-        price: 'listing_price',
-        sold: 'listing_sold',
-        image: 'listing_image'
-      })
-      .orderBy('listing_created', 'desc');
+    let listings = await retrieveListings();
 
     if (!listings) {
       return res

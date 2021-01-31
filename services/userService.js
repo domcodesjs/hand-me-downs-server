@@ -7,7 +7,7 @@ exports.insertUser = async (email, username, password) => {
     await user.save();
     return user;
   } catch (err) {
-    console.log(err);
+    throw Error('Could not create account');
   }
 };
 
@@ -16,7 +16,7 @@ exports.retrieveUserByUsername = async (username) => {
     const user = await User.findOne({ username });
     return user;
   } catch (err) {
-    console.log(err);
+    throw Error('User does not exist');
   }
 };
 
@@ -25,7 +25,7 @@ exports.retrieveUserByEmail = async (email) => {
     const user = await User.findOne({ email });
     return user;
   } catch (err) {
-    console.log(err);
+    throw Error('User does not exist');
   }
 };
 
@@ -34,6 +34,6 @@ exports.retrieveUserById = async (id) => {
     const user = new User.findById(id);
     return user;
   } catch (err) {
-    console.log(err);
+    throw Error('User does not exist');
   }
 };

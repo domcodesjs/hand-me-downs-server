@@ -12,7 +12,8 @@ const connectToDatabase = async () => {
   try {
     await mongoose.connect(DB_URL, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
+      useCreateIndex: true
     });
     console.log('Connected to MongoDB');
   } catch (err) {
@@ -21,6 +22,8 @@ const connectToDatabase = async () => {
 };
 connectToDatabase();
 require('./models/User');
+require('./models/Listing');
+require('./models/Category');
 
 const app = express();
 
