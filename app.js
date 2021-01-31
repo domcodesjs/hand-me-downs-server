@@ -24,6 +24,8 @@ connectToDatabase();
 require('./models/User');
 require('./models/Listing');
 require('./models/Category');
+require('./models/Order');
+require('./models/Purchase');
 
 const app = express();
 

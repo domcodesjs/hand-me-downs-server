@@ -1,7 +1,3 @@
-const multer = require('multer');
-const jimp = require('jimp');
-const db = null;
-const { v4: uuid } = require('uuid');
 const {
   insertListing,
   retrieveListing,
@@ -10,34 +6,9 @@ const {
   retrieveShopListings,
   modifyListing,
   removeListing,
-  retrieveUserListings
+  retrieveUserListings,
+  retrieveUserUpdatedListing
 } = require('../services/listingsService');
-
-const multerOptions = {
-  storage: multer.memoryStorage(),
-  fileFilter(_, file, next) {
-    const isImage = file.mimetype.startsWith('image/');
-    if (isImage) {
-      next(null, true);
-    } else {
-      next({ message: 'That filetype is not allowed' }, false);
-    }
-  }
-};
-
-exports.upload = multer(multerOptions).single('image');
-
-exports.resize = async (req, res, next) => {
-  if (!req.file) {
-    return next();
-  }
-  const extension = req.file.mimetype.split('/')[1];
-  req.body.image = `${uuid()}.${extension}`;
-  const image = await jimp.read(req.file.buffer);
-  image.resize(800, 1000);
-  image.write(`./public/uploads/images/${req.body.image}`);
-  next();
-};
 
 exports.getLatestListings = async (req, res) => {
   try {
@@ -57,7 +28,7 @@ exports.getLatestListings = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: 'Server error could not get listing'
+      errors: [{ msg: err.message }]
     });
   }
 };
@@ -124,23 +95,8 @@ exports.getListing = async (req, res) => {
 exports.getUserUpdatedListing = async (req, res) => {
   try {
     const { listingId } = req.params;
-    const { id } = req.user;
-    const listing = (
-      await db('listings')
-        .where({ listing_uid: listingId, listing_user: id })
-        .select({
-          title: 'listing_title',
-          category: 'listing_category',
-          gender: 'listing_gender',
-          description: 'listing_description',
-          image: 'listing_image',
-          uid: 'listing_uid',
-          sold: 'listing_sold',
-          created: 'listing_created',
-          slug: 'listing_slug',
-          price: 'listing_price'
-        })
-    )[0];
+    const user = req.user;
+    const listing = await retrieveUserUpdatedListing(user, listingId);
 
     res.json({
       success: true,

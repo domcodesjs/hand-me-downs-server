@@ -58,12 +58,21 @@ exports.retrieveShopListings = async (username) => {
   }
 };
 
+exports.retrieveUserUpdatedListing = async (user, listingId) => {
+  try {
+    const listing = await Listing.findOne({ _id: listingId, user: user.id });
+    return listing;
+  } catch (err) {
+    throw Error('Could not retrieve listing');
+  }
+};
+
 exports.retrieveUserListings = async (user) => {
   try {
     const listings = await Listing.find({ user: user.id });
     return listings;
   } catch (err) {
-    throw Error('Could not retrieve your listings');
+    throw Error('Could not retrieve listings');
   }
 };
 
