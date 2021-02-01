@@ -1,5 +1,6 @@
 const { nanoid } = require('nanoid');
 const db = null;
+const { retrievePurchase } = require('../services/purchasesService');
 
 exports.createPurchase = async (req, res) => {
   try {
@@ -87,33 +88,10 @@ exports.getPurchases = async (req, res) => {
 
 exports.getPurchase = async (req, res) => {
   try {
-    const { id } = req.user;
+    const user = req.user;
     const { purchaseId } = req.params;
 
-    const purchase = (
-      await db('purchases')
-        .where({ purchases_buyer: id, purchases_uid: purchaseId })
-        .returning('*')
-    )[0];
-
-    if (!purchase) {
-      return res.status(400).json({
-        success: false
-      });
-    }
-
-    for (let key in purchase.purchases_items) {
-      const orderStatus = await (
-        await db('orders')
-          .where({ order_uid: purchase.purchases_items[key]['orderId'] })
-          .returning('*')
-      )[0]['order_status'];
-      purchase.purchases_items[key]['orderStatus'] = orderStatus;
-    }
-
-    delete purchase.id;
-    delete purchase.purchases_stripe;
-    delete purchase.purchases_buyer;
+    const purchase = await retrievePurchase(user, purchaseId);
 
     res.json({
       success: true,
@@ -122,7 +100,7 @@ exports.getPurchase = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: [{ msg: err.message }]
     });
   }
 };

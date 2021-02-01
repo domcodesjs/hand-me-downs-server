@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Order = mongoose.model('Order');
 const Listing = mongoose.model('Listing');
 const { chargeCard } = require('./billingService');
+const { insertPurchase } = require('./purchasesService');
 
 const orderTotal = async (itemIds) => {
   try {
@@ -28,19 +29,63 @@ const markListingsAsSold = async (itemIds) => {
   }
 };
 
-exports.insertOrder = async (user, items, address, paymentMethod) => {
+const seperateOrders = async (items) => {
   try {
-    const total = await orderTotal(
-      items.map((item) => mongoose.Types.ObjectId(item.id))
-    );
-    const charge = await chargeCard(paymentMethod, total);
-    const updateListings = await markListingsAsSold(
-      items.map((item) => mongoose.Types.ObjectId(item.id))
+    let sellers = {};
+    for (let i = 0; i < items.length; i++) {
+      if (!sellers.hasOwnProperty(items[i].user._id)) {
+        sellers[items[i].user._id] = {
+          items: [mongoose.Types.ObjectId(items[i].id)]
+        };
+      } else {
+        sellers[items[i].user._id]['items'].push(
+          mongoose.Types.ObjectId(items[i].id)
+        );
+      }
+    }
+    return sellers;
+  } catch (err) {
+    throw Error('Could not create orders');
+  }
+};
+
+const insertOrders = async (user, seperatedOrders, address, charge) => {
+  try {
+    let orders = [];
+
+    for (let key in seperatedOrders) {
+      orders.push({
+        items: seperatedOrders[key]['items'],
+        shipping_address: address,
+        stripe_id: charge.id,
+        buyer: user.id,
+        seller: key
+      });
+    }
+
+    const allTheOrders = await Order.insertMany(orders);
+    const allTheOrderIds = allTheOrders.map((order) =>
+      mongoose.Types.ObjectId(order._id)
     );
 
-    // console.log(updateListings);
+    return allTheOrderIds;
   } catch (err) {
-    console.log(err);
+    throw Error('Could not create orders');
+  }
+};
+
+exports.insertOrder = async (user, items, address, paymentMethod) => {
+  try {
+    const itemIds = items.map((item) => mongoose.Types.ObjectId(item.id));
+    const total = await orderTotal(itemIds);
+    const charge = await chargeCard(paymentMethod, total);
+    await markListingsAsSold(itemIds);
+    const seperatedOrders = await seperateOrders(items);
+    const orderIds = await insertOrders(user, seperatedOrders, address, charge);
+    const purchase = await insertPurchase(user, orderIds, address, charge);
+    console.log(purchase);
+    return purchase;
+  } catch (err) {
     throw Error('Could not insert order');
   }
 };
@@ -67,7 +112,7 @@ exports.markOrderAsFulfilled = async (user, orderId) => {
   try {
     const order = await Order.findOneAndUpdate(
       { _id: orderId, seller: user.id },
-      { $set: { status: 'Shipped' } },
+      { $set: { shipped: true } },
       { new: true }
     );
     return order;

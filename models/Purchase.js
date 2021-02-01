@@ -2,13 +2,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const Purchase = new Schema({
-  total: {
-    type: Number,
-    required: true
-  },
-  items: [{ type: Schema.Types.ObjectId, ref: 'Listing', required: true }],
+  orders: [{ type: Schema.Types.ObjectId, ref: 'Order', required: true }],
   shipping_address: {
-    type: String,
+    type: Object,
     required: true
   },
   created_at: {
@@ -25,6 +21,14 @@ const Purchase = new Schema({
     ref: 'User',
     required: true
   }
+});
+
+Purchase.virtual('id').get(function () {
+  return this._id.toHexString();
+});
+
+Purchase.set('toJSON', {
+  virtuals: true
 });
 
 module.exports = mongoose.model('Purchase', Purchase);
