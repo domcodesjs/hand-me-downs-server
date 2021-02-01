@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const Purchase = new Schema({
+  total: {
+    type: Number,
+    required: true
+  },
   orders: [{ type: Schema.Types.ObjectId, ref: 'Order', required: true }],
   shipping_address: {
     type: Object,

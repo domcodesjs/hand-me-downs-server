@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const Order = new Schema({
+  total: {
+    type: Number,
+    required: true
+  },
   items: [{ type: Schema.Types.ObjectId, ref: 'Listing', required: true }],
   shipping_address: {
     type: Object,

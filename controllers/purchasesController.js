@@ -1,45 +1,7 @@
-const { nanoid } = require('nanoid');
 const db = null;
 const { retrievePurchase } = require('../services/purchasesService');
 
-exports.createPurchase = async (req, res) => {
-  try {
-    const { id } = req.user;
-    const { sellers, orderTotal, paymentIntent, address } = req.body;
-
-    const purchase = (
-      await db('purchases')
-        .insert({
-          purchases_buyer: id,
-          purchases_items: sellers,
-          purchases_shipping_address: address,
-          purchases_total: orderTotal,
-          purchases_uid: nanoid(8),
-          purchases_stripe: paymentIntent.id
-        })
-        .returning('*')
-    )[0];
-
-    if (!purchase) {
-      return res.status(400).json({
-        success: false,
-        message: 'Could not create purchase'
-      });
-    }
-
-    res.json({
-      success: true,
-      purchase: {
-        uid: purchase.purchases_uid
-      }
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
-  }
-};
+exports.createPurchase = async (req, res) => {};
 
 exports.getPurchases = async (req, res) => {
   try {

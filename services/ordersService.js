@@ -35,12 +35,14 @@ const seperateOrders = async (items) => {
     for (let i = 0; i < items.length; i++) {
       if (!sellers.hasOwnProperty(items[i].user._id)) {
         sellers[items[i].user._id] = {
-          items: [mongoose.Types.ObjectId(items[i].id)]
+          items: [mongoose.Types.ObjectId(items[i].id)],
+          total: items[i].price
         };
       } else {
         sellers[items[i].user._id]['items'].push(
           mongoose.Types.ObjectId(items[i].id)
         );
+        sellers[items[i].user._id]['total'] += items[i].price;
       }
     }
     return sellers;
@@ -55,6 +57,7 @@ const insertOrders = async (user, seperatedOrders, address, charge) => {
 
     for (let key in seperatedOrders) {
       orders.push({
+        total: seperatedOrders[key]['total'],
         items: seperatedOrders[key]['items'],
         shipping_address: address,
         stripe_id: charge.id,
@@ -82,8 +85,13 @@ exports.insertOrder = async (user, items, address, paymentMethod) => {
     await markListingsAsSold(itemIds);
     const seperatedOrders = await seperateOrders(items);
     const orderIds = await insertOrders(user, seperatedOrders, address, charge);
-    const purchase = await insertPurchase(user, orderIds, address, charge);
-    console.log(purchase);
+    const purchase = await insertPurchase(
+      user,
+      orderIds,
+      address,
+      charge,
+      total
+    );
     return purchase;
   } catch (err) {
     throw Error('Could not insert order');

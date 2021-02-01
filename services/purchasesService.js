@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 const Purchase = mongoose.model('Purchase');
 
-exports.insertPurchase = async (user, orderIds, address, charge) => {
+exports.insertPurchase = async (user, orderIds, address, charge, total) => {
   try {
     const purchase = new Purchase({
+      total,
       orders: orderIds,
       shipping_address: address,
       stripe_id: charge.id,
