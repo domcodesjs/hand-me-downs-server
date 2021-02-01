@@ -28,10 +28,9 @@ router.post(
 router.post(
   '/charge',
   passport.authenticate('jwt', { session: false }),
-  getChargeAmount,
-  chargeCard,
-  createOrders,
-  createPurchase
+  // chargeCard,
+  createOrders
+  // createPurchase
 );
 
 module.exports = router;

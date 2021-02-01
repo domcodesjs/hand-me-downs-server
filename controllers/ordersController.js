@@ -63,24 +63,6 @@ exports.getOrders = async (req, res) => {
   }
 };
 
-const convertToCents = (amount) => {
-  return Math.round(100 * parseFloat(amount.replace(/[$,]/g, '')));
-};
-
-exports.getChargeAmount = async (req, res, next) => {
-  try {
-    const itemIds = req.body.items.map((item) => item.uid);
-    const total = (
-      await db('listings').whereIn('listing_uid', itemIds).sum('listing_price')
-    )[0];
-    req.body.centsTotal = convertToCents(total.sum);
-    req.body.itemIds = itemIds;
-    next();
-  } catch (err) {
-    res.status(500).json({ success: false });
-  }
-};
-
 exports.chargeCard = async (req, res, next) => {
   try {
     const { paymentMethod, centsTotal } = req.body;
@@ -113,48 +95,49 @@ exports.chargeCard = async (req, res, next) => {
 
 exports.createOrders = async (req, res, next) => {
   try {
-    const { items, address, itemIds, paymentIntent, centsTotal } = req.body;
-    const { id } = req.user;
-    let sellers = {};
+    const { paymentMethod, items, address } = req.body;
+    const user = req.user;
+    const things = await insertOrder(user, items, address, paymentMethod);
 
-    for (let i = 0; i < items.length; i++) {
-      if (!sellers.hasOwnProperty(items[i].sellerUsername)) {
-        sellers[items[i].sellerUsername] = { items: [items[i]] };
-      } else {
-        sellers[items[i].sellerUsername]['items'].push(items[i]);
-      }
-    }
+    // mark listings as sold
+    // split orders up and send individual order to each seller
+    // create on purchase for the buyer that contains all the orders
 
-    await db('listings')
-      .whereIn('listing_uid', itemIds)
-      .update({ listing_sold: true })
-      .returning('*');
-
-    for (let key in sellers) {
-      let orderId = nanoid(8);
-      await db('orders').insert({
-        order_total: calculateOrderTotal(sellers[key]['items']),
-        order_items: sellers[key]['items'],
-        order_uid: orderId,
-        order_stripe: paymentIntent.id,
-        order_buyer: id,
-        order_seller: 1,
-        order_shipping_address: address
-      });
-      sellers[key]['shippingAddress'] = address;
-      sellers[key]['orderId'] = orderId;
-    }
-
-    for (let key in sellers) {
-      let items = sellers[key]['items'];
-      for (let i = 0; i < items.length; i++) {
-        items[i]['sold'] = true;
-      }
-    }
-
-    req.body.sellers = sellers;
-    req.body.orderTotal = centsTotal / 100;
-    next();
+    // let sellers = {};
+    // for (let i = 0; i < items.length; i++) {
+    //   if (!sellers.hasOwnProperty(items[i].sellerUsername)) {
+    //     sellers[items[i].sellerUsername] = { items: [items[i]] };
+    //   } else {
+    //     sellers[items[i].sellerUsername]['items'].push(items[i]);
+    //   }
+    // }
+    // await db('listings')
+    //   .whereIn('listing_uid', itemIds)
+    //   .update({ listing_sold: true })
+    //   .returning('*');
+    // for (let key in sellers) {
+    //   let orderId = nanoid(8);
+    //   await db('orders').insert({
+    //     order_total: calculateOrderTotal(sellers[key]['items']),
+    //     order_items: sellers[key]['items'],
+    //     order_uid: orderId,
+    //     order_stripe: paymentIntent.id,
+    //     order_buyer: id,
+    //     order_seller: 1,
+    //     order_shipping_address: address
+    //   });
+    //   sellers[key]['shippingAddress'] = address;
+    //   sellers[key]['orderId'] = orderId;
+    // }
+    // for (let key in sellers) {
+    //   let items = sellers[key]['items'];
+    //   for (let i = 0; i < items.length; i++) {
+    //     items[i]['sold'] = true;
+    //   }
+    // }
+    // req.body.sellers = sellers;
+    // req.body.orderTotal = centsTotal / 100;
+    // next();
   } catch (err) {
     res.status(500).json({ success: false, err });
   }
