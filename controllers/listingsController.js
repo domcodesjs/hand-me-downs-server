@@ -7,19 +7,13 @@ const {
   modifyListing,
   removeListing,
   retrieveUserListings,
-  retrieveUserUpdatedListing
+  retrieveUserUpdatedListing,
+  retrieveLatestListings
 } = require('../services/listingsService');
 
 exports.getLatestListings = async (req, res) => {
   try {
-    const listings = await retrieveListings();
-
-    if (!listings) {
-      return res.status(400).json({
-        success: false,
-        message: 'That listing does not exist'
-      });
-    }
+    const listings = await retrieveLatestListings();
 
     res.json({
       success: true,

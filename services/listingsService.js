@@ -30,7 +30,7 @@ exports.checkIfListingExists = async (listingId) => {
 
 exports.retrieveListings = async () => {
   try {
-    const listings = await Listing.find();
+    const listings = await Listing.find({ sold: false }).sort('-created_at');
     return listings;
   } catch (err) {
     throw Error('Could not retrieve listings');
@@ -52,7 +52,9 @@ exports.retrieveListing = async (listingId) => {
 exports.retrieveShopListings = async (username) => {
   try {
     const user = await retrieveUserByUsername(username);
-    const listings = await Listing.find({ user: user._id });
+    const listings = await Listing.find({ user: user._id, sold: false }).sort(
+      '-created_at'
+    );
     return listings;
   } catch (err) {
     throw Error('Shop does not exist');
@@ -68,9 +70,20 @@ exports.retrieveUserUpdatedListing = async (user, listingId) => {
   }
 };
 
+exports.retrieveLatestListings = async () => {
+  try {
+    const listing = await Listing.find({ sold: false })
+      .sort('-created_at')
+      .limit(4);
+    return listing;
+  } catch (err) {
+    throw Error('Could not retrieve listing');
+  }
+};
+
 exports.retrieveUserListings = async (user) => {
   try {
-    const listings = await Listing.find({ user: user.id });
+    const listings = await Listing.find({ user: user.id }).sort('-created_at');
     return listings;
   } catch (err) {
     throw Error('Could not retrieve listings');

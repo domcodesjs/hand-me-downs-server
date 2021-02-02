@@ -100,7 +100,10 @@ exports.insertOrder = async (user, items, address, paymentMethod) => {
 
 exports.retrieveOrder = async (user, orderId) => {
   try {
-    const order = await Order.findOne({ _id: orderId, seller: user.id });
+    const order = await Order.findOne({
+      _id: orderId,
+      seller: user.id
+    }).populate({ path: 'items', model: 'Listing' });
     return order;
   } catch (err) {
     throw Error('Could not get order');
@@ -109,7 +112,7 @@ exports.retrieveOrder = async (user, orderId) => {
 
 exports.retrieveOrders = async (user) => {
   try {
-    const orders = await Order.find({ seller: user.id });
+    const orders = await Order.find({ seller: user.id }).sort('-created_at');
     return orders;
   } catch (err) {
     throw Error('Could not get orders');
@@ -122,7 +125,7 @@ exports.markOrderAsFulfilled = async (user, orderId) => {
       { _id: orderId, seller: user.id },
       { $set: { shipped: true } },
       { new: true }
-    );
+    ).populate({ path: 'items', model: 'Listing' });
     return order;
   } catch (err) {
     throw Error('Could not mark order as fulfilled');
