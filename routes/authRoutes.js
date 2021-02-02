@@ -19,8 +19,8 @@ router.get(
   '/verifyJWT',
   passport.authenticate('jwt', { session: false }),
   (req, res) => {
-    const { email, username, role } = req.user;
-    res.json({ email, username, role });
+    const { email, username, admin } = req.user;
+    res.json({ email, username, admin });
   }
 );
 

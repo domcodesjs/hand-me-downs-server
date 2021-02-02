@@ -2,10 +2,9 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const { body, validationResult } = require('express-validator');
+const { upload, resize } = require('../services/imageService');
 const {
   createListing,
-  upload,
-  resize,
   getListing,
   listingExists,
   getShopListings,

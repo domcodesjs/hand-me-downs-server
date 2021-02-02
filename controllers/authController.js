@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
-const db = require('../knex/knex');
+const { retrieveUserByEmail } = require('../services/usersService');
 const { JWT_SECRET } = require('../config');
 
 exports.isAdmin = async (req, res) => {};
@@ -15,9 +14,7 @@ exports.login = async (req, res) => {
     }
 
     const { email, password } = req.body;
-    const user = await db('users')
-      .where({ user_email: email.toLowerCase() })
-      .first();
+    const user = await retrieveUserByEmail(email);
 
     if (!user) {
       return res.status(401).json({
@@ -26,7 +23,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.user_password);
+    const passwordMatch = await user.validatePassword(password);
 
     if (!passwordMatch) {
       return res.status(401).json({
@@ -38,9 +35,9 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       {
         id: user.id,
-        email: user.user_email,
-        username: user.user_username,
-        role: user.user_role
+        email: user.email,
+        username: user.username,
+        admin: user.admin
       },
       JWT_SECRET
     );
@@ -48,9 +45,10 @@ exports.login = async (req, res) => {
     res.json({
       success: true,
       user: {
-        email: user.user_email,
-        username: user.user_username,
-        role: user.user_role
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        admin: user.admin
       },
       token
     });

@@ -1,9 +1,31 @@
 require('dotenv').config();
+const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 const passport = require('passport');
+const { DB_URL } = require('./config');
+
+const connectToDatabase = async () => {
+  try {
+    await mongoose.connect(DB_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+      useFindAndModify: false
+    });
+    console.log('Connected to MongoDB');
+  } catch (err) {
+    console.log('Failed to connect to MongoDB', err);
+  }
+};
+connectToDatabase();
+require('./models/User');
+require('./models/Listing');
+require('./models/Category');
+require('./models/Order');
+require('./models/Purchase');
 
 const app = express();
 
@@ -23,6 +45,7 @@ app.use(passport.initialize());
 require('./config/passport')(passport);
 
 app.use('/', require('./routes/index'));
+app.use('/admin', require('./routes/adminRoutes'));
 app.use('/orders', require('./routes/ordersRoutes'));
 app.use('/users', require('./routes/usersRoutes'));
 app.use('/listings', require('./routes/listingsRoutes'));

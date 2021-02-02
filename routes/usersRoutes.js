@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../knex/knex');
 const { body } = require('express-validator');
-const { createUser } = require('../controllers/usersController');
+const { register } = require('../controllers/usersController');
+const {
+  retrieveUserByEmail,
+  retrieveUserByUsername
+} = require('../services/usersService');
 
 router.post(
   '/',
@@ -10,12 +13,8 @@ router.post(
     body('email').isEmail().withMessage('Invalid email format'),
     // check if email exists
     body('email').custom(async (email) => {
-      const userEmailExists = await db('users')
-        .where({
-          user_email: email.toLowerCase()
-        })
-        .first();
-      if (userEmailExists) {
+      const user = await retrieveUserByEmail(email);
+      if (user) {
         throw new Error('E-mail already in use');
       }
     }),
@@ -28,13 +27,8 @@ router.post(
       }
     }),
     body('username').custom(async (username) => {
-      const usernameExists = await db('users')
-        .where({
-          user_username: username.toLowerCase()
-        })
-        .first();
-
-      if (usernameExists) {
+      const user = await retrieveUserByUsername(username);
+      if (user) {
         throw new Error('Username already in use');
       }
     }),
@@ -42,7 +36,7 @@ router.post(
       .isLength({ min: 6 })
       .withMessage('Password must be at least 6 characters long')
   ],
-  createUser
+  register
 );
 
 module.exports = router;
